@@ -142,6 +142,7 @@ img{max-width:100%;height:auto;object-fit:contain;}
 
 .auto-logo-outer{
   width:115px;
+  overflow:visible;
   height:115px;
   border-radius:50%;
   border:3px solid var(--navy);
@@ -155,6 +156,7 @@ img{max-width:100%;height:auto;object-fit:contain;}
 }
 .auto-logo-outer svg{
   width: 100%;
+  overflow: visible;
   height: 100%;
   display: block;
 }
@@ -353,29 +355,33 @@ img{max-width:100%;height:auto;object-fit:contain;}
           </div>
 
           <div class="auto-logo-outer">
-            <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="60" cy="60" r="58" fill="#ffffff"/>
-              <circle cx="60" cy="60" r="57" fill="none" stroke="#24277c" stroke-width="2"/>
-              <circle cx="60" cy="60" r="53" fill="none" stroke="#e0b642" stroke-width="1.2"/>
-              
+            <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+              <circle cx="70" cy="70" r="66" fill="#ffffff"/>
+              <circle cx="70" cy="70" r="64" fill="none" stroke="#24277c" stroke-width="3"/>
+              <circle cx="70" cy="70" r="58" fill="none" stroke="#e0b642" stroke-width="1.5"/>
+
               <defs>
-                <path id="textArcTop" d="M 16,60 A 44,44 0 0 1 104,60"/>
-                <path id="textArcBottom" d="M 22,60 A 38,38 0 0 0 98,60"/>
+                <path id="textArcTop" d="M 18,70 A 52,52 0 0 1 122,70"/>
+                <path id="textArcBottom" d="M 25,70 A 45,45 0 0 0 115,70"/>
               </defs>
-              
-              <text font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#24277c" letter-spacing="0.3">
-                <textPath href="#textArcTop" startOffset="50%" text-anchor="middle">
-                  DEPARTMENT OF PHYSICS
-                </textPath>
+
+              <text font-family="'Times New Roman', serif"
+                    font-size="9.2"
+                    font-weight="bold"
+                    fill="#24277c"
+                    letter-spacing="0">
+                <textPath href="#textArcTop" startOffset="50%" text-anchor="middle">DEPARTMENT OF PHYSICS</textPath>
               </text>
-              
-              <text font-family="'Times New Roman', serif" font-size="6.5" font-weight="bold" fill="#e0b642" letter-spacing="0.5">
-                <textPath href="#textArcBottom" startOffset="50%" text-anchor="middle">
-                  GOVT. ASHEK MAHMUD COLLEGE
-                </textPath>
+
+              <text font-family="'Times New Roman', serif"
+                    font-size="5.1"
+                    font-weight="bold"
+                    fill="#e0b642"
+                    letter-spacing="0">
+                <textPath href="#textArcBottom" startOffset="50%" text-anchor="middle">GOVT. ASHEK MAHMUD COLLEGE</textPath>
               </text>
-              
-              <g transform="translate(60, 60) scale(0.55)">
+
+              <g transform="translate(70, 70) scale(0.58)">
                 <ellipse cx="0" cy="0" rx="32" ry="12" fill="none" stroke="#24277c" stroke-width="4"/>
                 <ellipse cx="0" cy="0" rx="32" ry="12" fill="none" stroke="#24277c" stroke-width="4" transform="rotate(60)"/>
                 <ellipse cx="0" cy="0" rx="32" ry="12" fill="none" stroke="#24277c" stroke-width="4" transform="rotate(-60)"/>
