@@ -80,6 +80,7 @@ body{
 .btn-pdf:hover{background-color:#1a1c5c;}
 .btn-png{background-color:var(--gold);}
 .btn-png:hover{background-color:#c99d32;}
+.btn:disabled{opacity:.7;cursor:wait;}
 
 .preview-panel{
   flex-grow:1;display:flex;justify-content:center;overflow-x:auto;
@@ -453,43 +454,133 @@ Object.values(inputs).forEach(input => {
 
 updatePreview();
 
-document.getElementById('download-pdf').addEventListener('click', function() {
-  const { jsPDF } = window.jspdf;
-  const element = document.getElementById('a4-preview');
-  const btnGroup = document.querySelector('.btn-group');
-  btnGroup.style.display = 'none';
+// ---------- Stable export helpers ----------
+const exportState = { busy: false };
 
-  html2canvas(element, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save('Practical_Notebook_Cover.pdf');
-    btnGroup.style.display = 'flex';
-  }).catch(err => {
-    console.error("PDF Error:", err);
-    alert("ডাউনলোড করতে সমস্যা হচ্ছে।");
-    btnGroup.style.display = 'flex';
+async function waitForPreviewAssets(element) {
+  // Wait until web fonts are fully loaded before html2canvas measures text.
+  if (document.fonts && document.fonts.ready) {
+    try { await document.fonts.ready; } catch (_) {}
+  }
+
+  // Wait for all preview images to finish loading/decoding.
+  const images = Array.from(element.querySelectorAll('img'));
+  await Promise.all(images.map(async (img) => {
+    if (!img.complete) {
+      await new Promise((resolve) => {
+        img.addEventListener('load', resolve, { once: true });
+        img.addEventListener('error', resolve, { once: true });
+      });
+    }
+    if (img.decode) {
+      try { await img.decode(); } catch (_) {}
+    }
+  }));
+}
+
+async function renderPreviewToCanvas() {
+  const element = document.getElementById('a4-preview');
+  await waitForPreviewAssets(element);
+
+  const canvas = await html2canvas(element, {
+    scale: 3,
+    useCORS: true,
+    allowTaint: false,
+    backgroundColor: '#ffffff',
+    logging: false,
+    imageTimeout: 15000,
+    removeContainer: true,
+    scrollX: 0,
+    scrollY: -window.scrollY,
+    // Keep export rendering in desktop mode. This prevents @media(max-width:1024px)
+    // from changing the layout inside html2canvas's cloned document.
+    windowWidth: 1400,
+    windowHeight: 1200,
+    onclone: (clonedDoc) => {
+      const clonedPage = clonedDoc.getElementById('a4-preview');
+      if (!clonedPage) return;
+
+      // Lock page geometry to exact A4 without changing the design.
+      Object.assign(clonedPage.style, {
+        width: '210mm',
+        height: '297mm',
+        minWidth: '210mm',
+        maxWidth: '210mm',
+        minHeight: '297mm',
+        maxHeight: '297mm',
+        margin: '0',
+        transform: 'none',
+        zoom: '1',
+        flex: 'none',
+        boxSizing: 'border-box',
+        overflow: 'hidden'
+      });
+
+      // Freeze any transition/animation during capture.
+      clonedDoc.querySelectorAll('*').forEach((node) => {
+        node.style.animation = 'none';
+        node.style.transition = 'none';
+      });
+    }
   });
+
+  return canvas;
+}
+
+function setExportButtonsDisabled(disabled) {
+  document.getElementById('download-pdf').disabled = disabled;
+  document.getElementById('download-png').disabled = disabled;
+}
+
+document.getElementById('download-pdf').addEventListener('click', async function() {
+  if (exportState.busy) return;
+  exportState.busy = true;
+  setExportButtonsDisabled(true);
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const canvas = await renderPreviewToCanvas();
+    const imgData = canvas.toDataURL('image/png', 1.0);
+
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true
+    });
+
+    // Exact A4 dimensions: no stretching from measured browser pixels.
+    pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+    pdf.save('Practical_Notebook_Cover.pdf');
+  } catch (err) {
+    console.error('PDF Error:', err);
+    alert('ডাউনলোড করতে সমস্যা হচ্ছে। Logo/image load হয়েছে কি না দেখে আবার চেষ্টা করুন।');
+  } finally {
+    exportState.busy = false;
+    setExportButtonsDisabled(false);
+  }
 });
 
-document.getElementById('download-png').addEventListener('click', function() {
-  const element = document.getElementById('a4-preview');
-  const btnGroup = document.querySelector('.btn-group');
-  btnGroup.style.display = 'none';
+document.getElementById('download-png').addEventListener('click', async function() {
+  if (exportState.busy) return;
+  exportState.busy = true;
+  setExportButtonsDisabled(true);
 
-  html2canvas(element, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
+  try {
+    const canvas = await renderPreviewToCanvas();
     const link = document.createElement('a');
     link.download = 'Practical_Notebook_Cover.png';
-    link.href = canvas.toDataURL('image/png');
+    link.href = canvas.toDataURL('image/png', 1.0);
+    document.body.appendChild(link);
     link.click();
-    btnGroup.style.display = 'flex';
-  }).catch(err => {
-    console.error("PNG Error:", err);
-    alert("ডাউনলোড করতে সমস্যা হচ্ছে।");
-    btnGroup.style.display = 'flex';
-  });
+    link.remove();
+  } catch (err) {
+    console.error('PNG Error:', err);
+    alert('ডাউনলোড করতে সমস্যা হচ্ছে। Logo/image load হয়েছে কি না দেখে আবার চেষ্টা করুন।');
+  } finally {
+    exportState.busy = false;
+    setExportButtonsDisabled(false);
+  }
 });
 </script>
 </body>
