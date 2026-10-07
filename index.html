@@ -14,7 +14,6 @@
   --muted:#68708b;
   --field-bg:#f4f6fb;
   --field-border:#d7dceb;
-  --atom-line:#e0e4ef;
   --white:#ffffff;
   --placeholder:#a6aec5;
 }
@@ -22,118 +21,160 @@
 body{
   font-family:'Inter',sans-serif;
   background:#eceef3;
+  min-height:100vh;
+  padding:20px;
   display:flex;
   justify-content:center;
-  padding:20px;
-  min-height:100vh;
+  align-items:flex-start;
 }
-.main-container{
-  display:flex;justify-content:center;
-  width:100%;max-width:440px;align-items:flex-start;
+
+.step-container{
+  width:100%;
+  max-width:500px;
+  background:#fff;
+  padding:35px 30px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(19,26,71,.12);
+  margin-top:30px;
 }
-.form-panel{
-  background:white;padding:30px;border-radius:12px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.05);
-  width:400px;flex-shrink:0;position:static;
-  max-height:95vh;overflow-y:auto;
+.step-container h2{
+  font-size:22px;color:var(--navy);
+  text-align:center;margin-bottom:8px;
 }
-.form-panel h2{
-  font-size:20px;margin-bottom:20px;color:var(--navy);
-  border-bottom:2px solid var(--field-border);padding-bottom:10px;
+.step-container .subtitle{
+  text-align:center;color:var(--muted);
+  font-size:13px;margin-bottom:25px;
 }
-.input-group{margin-bottom:15px;}
+
+.input-group{margin-bottom:16px;}
 .input-group label{
   display:block;font-size:13px;font-weight:600;
-  margin-bottom:5px;color:var(--muted);
+  margin-bottom:6px;color:var(--navy);
 }
 .input-group input[type="text"],
 .input-group select{
-  width:100%;padding:10px 12px;
+  width:100%;padding:12px 14px;
   border:1.4px solid var(--field-border);
-  background:var(--field-bg);border-radius:6px;
-  font-size:14px;color:var(--navy);font-weight:600;
+  background:var(--field-bg);
+  border-radius:8px;font-size:14px;
+  color:var(--navy);font-weight:600;
   font-family:'Inter',sans-serif;
 }
 .input-group select{
   cursor:pointer;
-  appearance:none;
-  -webkit-appearance:none;
+  appearance:none;-webkit-appearance:none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2324277c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat:no-repeat;
-  background-position: right 12px center;
-  padding-right: 35px;
+  background-position: right 14px center;
+  padding-right: 38px;
 }
 .input-group input::placeholder{
   color: var(--placeholder);
-  font-weight: 500;
-  font-style: italic;
+  font-weight: 500;font-style: italic;
 }
 .input-group input:focus,
-.input-group select:focus{outline:none;border-color:var(--navy);}
-.btn-group{display:flex;gap:10px;margin-top:25px;}
-.btn{
-  flex:1;padding:12px;border:none;border-radius:6px;
-  font-size:15px;font-weight:600;cursor:pointer;
-  color:white;transition:0.2s;
-}
-.btn-pdf{background-color:var(--navy);}
-.btn-pdf:hover{background-color:#1a1c5c;}
-.btn-png{background-color:var(--gold);}
-.btn-png:hover{background-color:#c99d32;}
-.btn:disabled{opacity:.7;cursor:wait;}
-
-/* Preview hidden from the user, but kept rendered off-screen so PDF/PNG export still works. */
-.preview-panel{
-  position:fixed;
-  left:-10000px;
-  top:0;
-  width:210mm;
-  height:297mm;
-  display:block;
-  overflow:visible;
-  pointer-events:none;
+.input-group select:focus{
+  outline:none;border-color:var(--navy);background:#fff;
 }
 
+.btn-main{
+  width:100%;padding:14px;border:none;
+  border-radius:8px;font-size:16px;font-weight:700;
+  cursor:pointer;color:#fff;background:var(--navy);
+  margin-top:20px;transition:0.2s;letter-spacing:.3px;
+}
+.btn-main:hover{background:#1a1c5c;transform:translateY(-1px);}
+
+.preview-screen{
+  display:none;width:100%;max-width:900px;margin-top:20px;
+}
+.preview-screen.active{display:block;}
+
+.preview-topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:15px;gap:10px;flex-wrap:wrap;
+}
+.preview-topbar .title{
+  color:var(--navy);font-size:18px;font-weight:700;
+}
+.preview-topbar .btn-back{
+  padding:10px 18px;border:2px solid var(--navy);
+  background:#fff;color:var(--navy);border-radius:8px;
+  font-size:14px;font-weight:600;cursor:pointer;transition:0.2s;
+}
+.preview-topbar .btn-back:hover{background:var(--navy);color:#fff;}
+
+/* ============================================
+   Auto-Fit Preview Wrapper
+   ============================================ */
+.a4-scroll-wrapper{
+  width:100%;
+  background:#e5e8ee;
+  border-radius:12px;
+  padding:15px;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  overflow:hidden;
+}
+.a4-scale-outer{
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  /* width/height set by JS */
+}
+.a4-scale-inner{
+  width:794px;
+  height:1123px;
+  transform-origin: top left;
+  flex-shrink:0;
+}
+
+/* ============================================
+   A4 Page
+   ============================================ */
 .a4-page{
-  width:210mm;height:297mm;
+  width:794px;
+  height:1123px;
+  min-width:794px;
+  min-height:1123px;
+  flex-shrink:0;
   background-color:var(--white);
   position:relative;
   padding:22mm 20mm 25mm;
   border:3px solid var(--navy);
   border-radius:17px;
-  box-shadow:0 10px 30px rgba(19,26,71,.12);
+  box-shadow:0 10px 30px rgba(19,26,71,.18);
   overflow:hidden;
 }
-
-/* LARGE BACKGROUND ATOM WATERMARK */
-.background-atom{
-  position:absolute;
-  left:50%;
-  top:56%;
-  transform:translate(-50%,-50%);
-  width:540px;
-  height:600px;
-  opacity:0.08;
-  z-index:0;
-  pointer-events:none;
-}
-
-.background-atom svg{
-  width:100%;
-  height:100%;
-  display:block;
-  overflow:visible;
-}
-
-.inner-border{
-  position:absolute;
-  top:10px;right:10px;bottom:10px;left:10px;
+.a4-page::before{
+  content:"";position:absolute;inset:10px;
   border:1.5px solid var(--gold);
-  border-radius:12px;
-  pointer-events:none;
-  z-index:1;
-  box-sizing:border-box;
+  border-radius:12px;pointer-events:none;z-index:1;
 }
+
+.gamc-logo-svg{width:100%;height:100%;display:block;}
+
+.auto-logo-outer{
+  width:120px;height:120px;border-radius:50%;flex-shrink:0;
+  display:flex;justify-content:center;align-items:center;
+  position:relative;z-index:5;
+  box-shadow:0 3px 10px rgba(36,39,124,0.25);
+}
+
+.bg-watermark{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:550px;height:550px;
+  opacity:0.12;z-index:0;pointer-events:none;
+}
+.bg-watermark-corner{
+  position:absolute;bottom:30px;right:20px;
+  width:200px;height:200px;
+  opacity:0.15;z-index:0;pointer-events:none;
+}
+
 .corner{position:absolute;background:var(--gold);z-index:3;}
 .tl-h{left:12px;top:25px;width:88px;height:6px;}
 .tl-v{left:12px;top:25px;width:6px;height:83px;}
@@ -154,30 +195,10 @@ img{max-width:100%;height:auto;object-fit:contain;}
 }
 
 .header-row{
-  display:flex;justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-  gap: 10px;
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:20px;gap:10px;
 }
 .left-logo img{width:100px;height:100px;object-fit:contain;}
-
-.auto-logo-outer{
-  width:115px;
-  height:115px;
-  flex-shrink:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  overflow:visible;
-  background:transparent;
-}
-.auto-logo-outer svg{
-  width:100%;
-  height:100%;
-  display:block;
-  overflow:visible;
-  filter:drop-shadow(0 2px 4px rgba(36,39,124,0.18));
-}
 
 .title-section{
   text-align:center;flex-grow:1;
@@ -198,36 +219,27 @@ img{max-width:100%;height:auto;object-fit:contain;}
 }
 
 .banner{
-  width:95%;min-height:58px;margin:0 auto 15px;
-  padding:8px 15px;
+  width:95%;min-height:58px;
+  margin:0 auto 15px;padding:10px 15px;
   border-radius:15px;background:var(--navy);color:#fff;
   display:flex;align-items:center;justify-content:center;
-  gap:18px;font-size:20px;font-weight:800;
-  letter-spacing:.2px;
-  text-transform:uppercase;
-  text-align: center;
+  gap:12px;font-size:17px;font-weight:800;
+  letter-spacing:.2px;text-transform:uppercase;
+  text-align:center;position:relative;z-index:5;
 }
 .banner .dot{
   width:9px;height:9px;border-radius:50%;
   background:var(--gold);flex:0 0 auto;
 }
-.banner .banner-text {
-  line-height: 1.2;
-  word-break: break-word;
-}
+.banner .banner-text{line-height:1.3;word-break:break-word;padding:0 2px;}
 
 .course-info{
   text-align:center;color:var(--navy);
   font-size:16px;font-weight:700;margin:0 0 5px 0;
 }
-
-/* Subject Code লাইন — পুরোটাই নেভি ব্লু */
 .subject-code-line{
-  text-align:center;
-  color:var(--navy);
-  font-size:14px;
-  margin:0 0 25px 0;
-  font-weight:700;
+  text-align:center;color:var(--navy);
+  font-size:14px;margin:0 0 25px 0;font-weight:700;
 }
 .subject-code-line span{color:var(--navy);font-weight:700;}
 
@@ -244,14 +256,12 @@ img{max-width:100%;height:auto;object-fit:contain;}
 }
 
 .preview-placeholder{
-  color: var(--placeholder) !important;
-  font-style: italic;
-  font-weight: 500 !important;
+  color:var(--placeholder) !important;
+  font-style:italic;font-weight:500 !important;
 }
 
 .footer-area{
-  position:absolute;left:64px;right:64px;bottom:30px;
-  z-index:3;
+  position:absolute;left:64px;right:64px;bottom:30px;z-index:3;
 }
 .formula{
   font-size:11px;color:#a6aec5;
@@ -270,211 +280,225 @@ img{max-width:100%;height:auto;object-fit:contain;}
   font-weight:700;font-size:10px;margin-top:5px;
 }
 
-.atom-footer{
-  position:absolute;right:4px;bottom:36px;
-  width:112px;height:78px;opacity:.85;
+.download-buttons{
+  display:flex;gap:12px;margin-top:20px;
 }
-.atom-footer span{
-  position:absolute;left:18px;top:26px;
-  width:76px;height:30px;
-  border:1.6px solid var(--atom-line);
-  border-radius:50%;transform-origin:center;
+.btn-download{
+  flex:1;padding:15px;border:none;
+  border-radius:10px;font-size:16px;font-weight:700;
+  cursor:pointer;color:#fff;transition:0.2s;letter-spacing:.3px;
 }
-.atom-footer span:nth-child(2){transform:rotate(60deg);}
-.atom-footer span:nth-child(3){transform:rotate(-60deg);}
-.atom-footer::after{
-  content:"";position:absolute;
-  width:12px;height:12px;border-radius:50%;
-  background:var(--gold);left:50px;top:35px;
+.btn-download-pdf{background:#e74c3c;}
+.btn-download-pdf:hover{background:#c0392b;}
+.btn-download-png{background:#27ae60;}
+.btn-download-png:hover{background:#1e8449;}
+.btn-download:disabled{opacity:0.7;cursor:not-allowed;}
+
+.btn-edit-bottom{
+  width:100%;padding:14px;margin-top:12px;
+  border:2px solid var(--navy);background:#fff;color:var(--navy);
+  border-radius:10px;font-size:16px;font-weight:700;
+  cursor:pointer;transition:0.2s;letter-spacing:.3px;
+}
+.btn-edit-bottom:hover{
+  background:var(--navy);color:#fff;transform:translateY(-1px);
 }
 
-@media(max-width:1024px){
-  .main-container{align-items:center;}
-  .form-panel{width:100%;max-width:600px;position:static;}
-  .preview-panel{
-    position:fixed;
-    left:-10000px;
-    top:0;
-    width:210mm;
-    height:297mm;
-    display:block;
-    overflow:visible;
-    pointer-events:none;
-  }
+@media(max-width:768px){
+  body{padding:10px;}
+  .step-container{padding:25px 20px;margin-top:10px;}
+  .preview-screen{max-width:100%;}
+  .preview-topbar{flex-direction:column;align-items:stretch;}
+  .preview-topbar .btn-back{width:100%;}
+  .download-buttons{flex-direction:column;}
+  .a4-scroll-wrapper{padding:10px;}
 }
 </style>
 </head>
 <body>
-<div class="main-container">
-  <div class="form-panel">
-    <h2>Submit Your Data</h2>
-    
-    <!-- Subject Name ড্রপডাউন (Subject Code অটো চেঞ্জ হবে) -->
-    <div class="input-group">
-      <label>Subject Name (for banner)</label>
-      <select id="input-subject-name">
-        <option value="PHYSICS" data-code="212706" selected>PHYSICS</option>
-        <option value="CHEMISTRY" data-code="212808">CHEMISTRY</option>
-      </select>
-    </div>
-    
-    <div class="input-group">
-      <label>Student Name</label>
-      <input type="text" id="input-name" placeholder="e.g. Md. Tanvir Hossain">
-    </div>
-    <div class="input-group">
-      <label>Exam Roll</label>
-      <input type="text" id="input-exam-roll" placeholder="e.g. 123456">
-    </div>
-    <div class="input-group">
-      <label>Registration No</label>
-      <input type="text" id="input-reg-no" placeholder="e.g. 987654">
-    </div>
-    <div class="input-group">
-      <label>Class Roll</label>
-      <input type="text" id="input-class-roll" placeholder="e.g. 2537">
-    </div>
-    <!-- Subject Code ইনপুট ফিল্ড বাদ দেওয়া হয়েছে — এটি এখন ড্রপডাউন থেকে অটো আসবে -->
-    
-    <div class="btn-group">
-      <button class="btn btn-pdf" id="download-pdf">Download PDF</button>
-      <button class="btn btn-png" id="download-png">Download PNG</button>
-    </div>
+
+<!-- STEP 1: INPUT FORM -->
+<div class="step-container" id="step1">
+  <h2>তথ্য পূরণ করুন</h2>
+  <p class="subtitle">নিচের তথ্যগুলো পূরণ করে "Show Preview" বাটনে ক্লিক করুন</p>
+
+  <div class="input-group">
+    <label>Subject Name</label>
+    <select id="input-subject-name">
+      <option value="PHYSICS" data-code="212706" selected>PHYSICS</option>
+      <option value="CHEMISTRY" data-code="212808">CHEMISTRY</option>
+    </select>
   </div>
 
-  <div class="preview-panel" aria-hidden="true">
-    <div class="a4-page" id="a4-preview">
-      <div class="inner-border" aria-hidden="true"></div>
-      <!-- Large background atom watermark -->
-      <div class="background-atom" aria-hidden="true">
-        <svg viewBox="0 0 520 600" xmlns="http://www.w3.org/2000/svg">
-          <g transform="translate(260 300)" fill="none" stroke="#24277c" stroke-width="26" stroke-linecap="round">
-            <ellipse cx="0" cy="0" rx="225" ry="92"/>
-            <ellipse cx="0" cy="0" rx="225" ry="92" transform="rotate(60)"/>
-            <ellipse cx="0" cy="0" rx="225" ry="92" transform="rotate(-60)"/>
-          </g>
-          <circle cx="260" cy="300" r="44" fill="#24277c"/>
-        </svg>
-      </div>
+  <div class="input-group">
+    <label>Student Name</label>
+    <input type="text" id="input-name" placeholder="e.g. Md. Tanvir Hossain">
+  </div>
+  <div class="input-group">
+    <label>Exam Roll</label>
+    <input type="text" id="input-exam-roll" placeholder="e.g. 123456">
+  </div>
+  <div class="input-group">
+    <label>Registration No</label>
+    <input type="text" id="input-reg-no" placeholder="e.g. 987654">
+  </div>
+  <div class="input-group">
+    <label>Class Roll</label>
+    <input type="text" id="input-class-roll" placeholder="e.g. 2537">
+  </div>
 
-      <i class="corner tl-h"></i><i class="corner tl-v"></i>
-      <i class="corner tr-h"></i><i class="corner tr-v"></i>
+  <button class="btn-main" id="btn-show-preview">Show Preview →</button>
+</div>
 
-      <div class="content-wrapper">
-        <div class="top-logo">
-          <img src="https://upload.wikimedia.org/wikipedia/en/5/58/National_University%2C_Bangladesh_crest.svg" alt="National University" crossorigin="anonymous">
-        </div>
+<!-- STEP 2: PREVIEW + DOWNLOAD -->
+<div class="preview-screen" id="step2">
+  <div class="preview-topbar">
+    <span class="title">প্রিভিউ দেখুন</span>
+    <button class="btn-back" id="btn-back">← Edit Info</button>
+  </div>
 
-        <div class="header-row">
-          <div class="left-logo">
-            <img id="left-logo-img" src="dclogo.png" alt="College Logo">
-          </div>
-          
-          <div class="title-section">
-            <h1>DEPARTMENT OF PHYSICS</h1>
-            <h2>GOVT. ASHEK MAHMUD COLLEGE, JAMALPUR.</h2>
-            <div class="gold-line"></div>
-            <div class="banner">
-              <span class="dot"></span>
-              <span class="banner-text"><span id="preview-subject-name">PHYSICS</span> PRACTICAL NOTEBOOK</span>
-              <span class="dot"></span>
-            </div>
-            <p class="course-info">B.Sc. Hon's ( 1st Year)</p>
-            <!-- Subject Code অটো আপডেট হবে ড্রপডাউন থেকে -->
-            <p class="subject-code-line">Subject Code : <span id="preview-subject-code">212706</span></p>
-          </div>
+  <div class="a4-scroll-wrapper" id="a4-scroll-wrapper">
+    <div class="a4-scale-outer" id="a4-scale-outer">
+      <div class="a4-scale-inner" id="a4-scale-inner">
+        <div class="a4-page" id="a4-preview">
 
-          <div class="auto-logo-outer">
-            <svg viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg" aria-label="Department of Physics Logo">
+          <!-- ব্যাকগ্রাউন্ড ওয়াটারমার্ক -->
+          <div class="bg-watermark">
+            <svg viewBox="0 0 420 420" class="gamc-logo-svg">
               <defs>
-                <path id="deptTopArc" d="M 48,210 A 162,162 0 0 1 372,210" fill="none"/>
-                <path id="deptBottomArc" d="M 60,210 A 150,150 0 0 0 360,210" fill="none"/>
+                <path id="bgTopArc" d="M 45,210 A 165,165 0 0,1 375,210" fill="none"/>
+                <path id="bgBotArc" d="M 55,210 A 155,155 0 0,0 365,210" fill="none"/>
               </defs>
-
-              <!-- Navy outer badge using the cover's original navy -->
-              <circle cx="210" cy="210" r="205" fill="#24277c"/>
-              <circle cx="210" cy="210" r="193" fill="none" stroke="#ffffff" stroke-width="10"/>
-              <circle cx="210" cy="210" r="180" fill="none" stroke="#e0b642" stroke-width="4"/>
-
-              <!-- Curved department text -->
-              <text font-family="Arial, Helvetica, sans-serif"
-                    font-size="23"
-                    font-weight="800"
-                    fill="#ffffff"
-                    letter-spacing="1.1">
-                <textPath href="#deptTopArc" startOffset="50%" text-anchor="middle">DEPARTMENT OF PHYSICS</textPath>
+              <circle cx="210" cy="210" r="207" fill="none" stroke="#24277c" stroke-width="6"/>
+              <circle cx="210" cy="210" r="200" fill="none" stroke="#D4AF37" stroke-width="3"/>
+              <text font-family="Arial, sans-serif" font-weight="800" font-size="22" fill="#24277c" letter-spacing="1.5">
+                <textPath href="#bgTopArc" startOffset="50%" text-anchor="middle">DEPARTMENT OF PHYSICS</textPath>
               </text>
-
-              <text font-family="Arial, Helvetica, sans-serif"
-                    font-size="18.5"
-                    font-weight="800"
-                    fill="#ffffff"
-                    letter-spacing="0.55">
-                <textPath href="#deptBottomArc" startOffset="50%" text-anchor="middle">GOVT. ASHEK MAHMUD COLLEGE</textPath>
+              <text font-family="Arial, sans-serif" font-weight="800" font-size="22" fill="#24277c" letter-spacing="1.5">
+                <textPath href="#bgBotArc" startOffset="50%" text-anchor="middle">GOVT. ASHEK MAHMUD COLLEGE</textPath>
               </text>
-
-              <!-- White inner circle -->
-              <circle cx="210" cy="210" r="119" fill="#ffffff" stroke="#24277c" stroke-width="7"/>
-              <circle cx="210" cy="210" r="109" fill="none" stroke="#e0b642" stroke-width="3" opacity="0.9"/>
-
-              <!-- Atom icon -->
-              <g transform="translate(210 188)" fill="none" stroke="#24277c" stroke-width="6" stroke-linecap="round">
-                <ellipse cx="0" cy="0" rx="61" ry="24"/>
-                <ellipse cx="0" cy="0" rx="61" ry="24" transform="rotate(60)"/>
-                <ellipse cx="0" cy="0" rx="61" ry="24" transform="rotate(120)"/>
+              <circle cx="210" cy="210" r="130" fill="none" stroke="#D4AF37" stroke-width="3"/>
+              <g transform="translate(210, 195)">
+                <ellipse cx="0" cy="0" rx="67" ry="27" fill="none" stroke="#D4AF37" stroke-width="4"/>
+                <ellipse cx="0" cy="0" rx="67" ry="27" fill="none" stroke="#D4AF37" stroke-width="4" transform="rotate(60)"/>
+                <ellipse cx="0" cy="0" rx="67" ry="27" fill="none" stroke="#D4AF37" stroke-width="4" transform="rotate(120)"/>
+                <circle cx="0" cy="0" r="14" fill="#D4AF37"/>
               </g>
-
-              <!-- Nucleus and electrons in gold -->
-              <circle cx="210" cy="188" r="12" fill="#24277c"/>
-              <circle cx="271" cy="188" r="6" fill="#e0b642"/>
-              <circle cx="179" cy="135" r="6" fill="#e0b642"/>
-              <circle cx="179" cy="241" r="6" fill="#e0b642"/>
-
-              <!-- Formula -->
-              <text x="210" y="291"
-                    text-anchor="middle"
-                    font-family="'Times New Roman', Times, serif"
-                    font-size="36"
-                    font-weight="900"
-                    fill="#24277c">E=mc²</text>
+              <text x="210" y="300" text-anchor="middle" font-family="Times New Roman, serif" font-size="34" font-weight="900" fill="#D4AF37">E=mc²</text>
             </svg>
           </div>
 
-        </div>
+          <div class="bg-watermark-corner">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="gamc-logo-svg">
+              <ellipse cx="50" cy="50" rx="42" ry="16" fill="none" stroke="#24277c" stroke-width="4"/>
+              <ellipse cx="50" cy="50" rx="42" ry="16" fill="none" stroke="#24277c" stroke-width="4" transform="rotate(60 50 50)"/>
+              <ellipse cx="50" cy="50" rx="42" ry="16" fill="none" stroke="#24277c" stroke-width="4" transform="rotate(-60 50 50)"/>
+              <circle cx="50" cy="50" r="9" fill="#24277c"/>
+            </svg>
+          </div>
 
-        <div class="form-section">
-          <div class="form-row">
-            <span>Submitted by</span>
-            <span>:</span>
-            <span id="preview-name" class="preview-placeholder">Student Name</span>
+          <i class="corner tl-h"></i><i class="corner tl-v"></i>
+          <i class="corner tr-h"></i><i class="corner tr-v"></i>
+
+          <div class="content-wrapper">
+            <div class="top-logo">
+              <img src="https://upload.wikimedia.org/wikipedia/en/5/58/National_University%2C_Bangladesh_crest.svg" alt="National University" crossorigin="anonymous">
+            </div>
+
+            <div class="header-row">
+              <div class="left-logo">
+                <img id="left-logo-img" src="https://amc.eshiksaems.com/image/dclogo.png" alt="College Logo">
+              </div>
+              
+              <div class="title-section">
+                <h1>DEPARTMENT OF PHYSICS</h1>
+                <h2>GOVT. ASHEK MAHMUD COLLEGE, JAMALPUR.</h2>
+                <div class="gold-line"></div>
+                <div class="banner">
+                  <span class="dot"></span>
+                  <span class="banner-text"><span id="preview-subject-name">PHYSICS</span> PRACTICAL NOTEBOOK</span>
+                  <span class="dot"></span>
+                </div>
+                <p class="course-info">B.Sc. Hon's ( 1st Year)</p>
+                <p class="subject-code-line">Subject Code : <span id="preview-subject-code">212706</span></p>
+              </div>
+
+              <div class="auto-logo-outer">
+                <svg viewBox="0 0 420 420" class="gamc-logo-svg">
+                  <defs>
+                    <linearGradient id="deptGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#0a2a43"/>
+                      <stop offset="100%" stop-color="#144d7a"/>
+                    </linearGradient>
+                    <path id="deptTopArc" d="M 45,210 A 165,165 0 0,1 375,210" fill="none"/>
+                    <path id="deptBotArc" d="M 55,210 A 155,155 0 0,0 365,210" fill="none"/>
+                  </defs>
+                  <circle cx="210" cy="210" r="210" fill="url(#deptGrad)"/>
+                  <circle cx="210" cy="210" r="204" fill="none" stroke="#D4AF37" stroke-width="12"/>
+                  <text font-family="Arial, sans-serif" font-weight="800" font-size="24" fill="#ffffff" letter-spacing="1.5">
+                    <textPath href="#deptTopArc" startOffset="50%" text-anchor="middle">DEPARTMENT OF PHYSICS</textPath>
+                  </text>
+                  <text font-family="Arial, sans-serif" font-weight="800" font-size="22" fill="#ffffff" letter-spacing="1.5">
+                    <textPath href="#deptBotArc" startOffset="50%" text-anchor="middle">GOVT. ASHEK MAHMUD COLLEGE</textPath>
+                  </text>
+                  <circle cx="210" cy="210" r="130" fill="#ffffff" stroke="#D4AF37" stroke-width="5"/>
+                  <g transform="translate(210, 195)">
+                    <ellipse cx="0" cy="0" rx="67" ry="27" fill="none" stroke="#D4AF37" stroke-width="5"/>
+                    <ellipse cx="0" cy="0" rx="67" ry="27" fill="none" stroke="#D4AF37" stroke-width="5" transform="rotate(60)"/>
+                    <ellipse cx="0" cy="0" rx="67" ry="27" fill="none" stroke="#D4AF37" stroke-width="5" transform="rotate(120)"/>
+                    <circle cx="0" cy="0" r="14" fill="#D4AF37"/>
+                    <circle cx="67" cy="0" r="6" fill="#D4AF37"/>
+                    <circle cx="-33" cy="58" r="6" fill="#D4AF37"/>
+                    <circle cx="-33" cy="-58" r="6" fill="#D4AF37"/>
+                  </g>
+                  <text x="210" y="290" text-anchor="middle" font-family="Times New Roman, serif" font-size="34" font-weight="900" fill="#D4AF37">E=mc²</text>
+                </svg>
+              </div>
+
+            </div>
+
+            <div class="form-section">
+              <div class="form-row">
+                <span>Submitted by</span>
+                <span>:</span>
+                <span id="preview-name" class="preview-placeholder">Student Name</span>
+              </div>
+              <div class="form-row">
+                <span>Exam Roll</span>
+                <span>:</span>
+                <span id="preview-exam-roll" class="preview-placeholder">Exam Roll</span>
+              </div>
+              <div class="form-row">
+                <span>Registration No</span>
+                <span>:</span>
+                <span id="preview-reg-no" class="preview-placeholder">Registration No</span>
+              </div>
+              <div class="form-row">
+                <span>Class Roll</span>
+                <span>:</span>
+                <span id="preview-class-roll" class="preview-placeholder">Class Roll</span>
+              </div>
+            </div>
           </div>
-          <div class="form-row">
-            <span>Exam Roll</span>
-            <span>:</span>
-            <span id="preview-exam-roll" class="preview-placeholder">Exam Roll</span>
-          </div>
-          <div class="form-row">
-            <span>Registration No</span>
-            <span>:</span>
-            <span id="preview-reg-no" class="preview-placeholder">Registration No</span>
-          </div>
-          <div class="form-row">
-            <span>Class Roll</span>
-            <span>:</span>
-            <span id="preview-class-roll" class="preview-placeholder">Class Roll</span>
+
+          <div class="footer-area">
+            <div class="formula">λ&nbsp;&nbsp;•&nbsp;&nbsp;ΔE&nbsp;&nbsp;•&nbsp;&nbsp;F = ma&nbsp;&nbsp;•&nbsp;&nbsp;E = mc²</div>
+            <div class="footer-line"></div>
+            <div class="address">Government Ashek Mahmud College, Jamalpur-2000, Mymensingh, Bangladesh</div>
+            <div class="web">www.amc.edu.bd</div>
           </div>
         </div>
-      </div>
-
-      <div class="footer-area">
-        <div class="formula">λ&nbsp;&nbsp;•&nbsp;&nbsp;ΔE&nbsp;&nbsp;•&nbsp;&nbsp;F = ma&nbsp;&nbsp;•&nbsp;&nbsp;E = mc²</div>
-        <div class="atom-footer"><span></span><span></span><span></span></div>
-        <div class="footer-line"></div>
-        <div class="address">Government Ashek Mahmud College, Jamalpur-2000, Mymensingh, Bangladesh</div>
-        <div class="web">www.amc.edu.bd</div>
       </div>
     </div>
   </div>
+
+  <!-- Download Buttons -->
+  <div class="download-buttons">
+    <button class="btn-download btn-download-pdf" id="download-pdf">📄 Download PDF</button>
+    <button class="btn-download btn-download-png" id="download-png">🖼️ Download PNG</button>
+  </div>
+
+  <button class="btn-edit-bottom" id="btn-edit-bottom">✏️ Edit Information</button>
 </div>
 
 <script>
@@ -513,7 +537,6 @@ function setPreviewValue(element, value, placeholderText) {
 }
 
 function updatePreview() {
-  // Subject Name ও Subject Code একসাথে আপডেট হবে
   const selectedOption = inputs.subjectName.options[inputs.subjectName.selectedIndex];
   previews.subjectName.textContent = selectedOption.value;
   previews.subjectCode.textContent = selectedOption.dataset.code;
@@ -524,141 +547,205 @@ function updatePreview() {
   setPreviewValue(previews.classRoll, inputs.classRoll.value, placeholders.classRoll);
 }
 
-Object.values(inputs).forEach(input => {
-  input.addEventListener('input', updatePreview);
-  input.addEventListener('change', updatePreview);
-});
-
-updatePreview();
-
-// ---------- Stable export helpers ----------
-const exportState = { busy: false };
-
-async function waitForPreviewAssets(element) {
-  // Wait until web fonts are fully loaded before html2canvas measures text.
-  if (document.fonts && document.fonts.ready) {
-    try { await document.fonts.ready; } catch (_) {}
+// ============================================
+// AUTO-FIT A4 TO SCREEN (ফোনেও পুরো প্রিভিউ দেখা যাবে)
+// ============================================
+function fitA4ToScreen() {
+  const scrollWrapper = document.getElementById('a4-scroll-wrapper');
+  const outer = document.getElementById('a4-scale-outer');
+  const inner = document.getElementById('a4-scale-inner');
+  
+  if (!scrollWrapper || !outer || !inner) return;
+  
+  const A4_W = 794;
+  const A4_H = 1123;
+  
+  // Reset
+  inner.style.transform = '';
+  outer.style.width = A4_W + 'px';
+  outer.style.height = A4_H + 'px';
+  
+  // Available width = wrapper width - padding
+  const style = getComputedStyle(scrollWrapper);
+  const paddingLeft = parseFloat(style.paddingLeft) || 0;
+  const paddingRight = parseFloat(style.paddingRight) || 0;
+  const availableWidth = scrollWrapper.clientWidth - paddingLeft - paddingRight;
+  
+  if (availableWidth > 0 && availableWidth < A4_W) {
+    const scale = availableWidth / A4_W;
+    inner.style.transform = `scale(${scale})`;
+    inner.style.transformOrigin = 'top left';
+    outer.style.width = (A4_W * scale) + 'px';
+    outer.style.height = (A4_H * scale) + 'px';
+  } else {
+    outer.style.width = A4_W + 'px';
+    outer.style.height = A4_H + 'px';
   }
-
-  // Wait for all preview images to finish loading/decoding.
-  const images = Array.from(element.querySelectorAll('img'));
-  await Promise.all(images.map(async (img) => {
-    if (!img.complete) {
-      await new Promise((resolve) => {
-        img.addEventListener('load', resolve, { once: true });
-        img.addEventListener('error', resolve, { once: true });
-      });
-    }
-    if (img.decode) {
-      try { await img.decode(); } catch (_) {}
-    }
-  }));
 }
 
-async function renderPreviewToCanvas() {
+// Window resize হলে আবার ফিট করবে
+let resizeTimer;
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(fitA4ToScreen, 100);
+});
+
+// ============================================
+// STEP NAVIGATION
+// ============================================
+document.getElementById('btn-show-preview').addEventListener('click', function() {
+  updatePreview();
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').classList.add('active');
+  // লেআউট হওয়ার পর ফিট করবে
+  setTimeout(fitA4ToScreen, 60);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+});
+
+function goToEdit() {
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step1').style.display = 'block';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+document.getElementById('btn-back').addEventListener('click', goToEdit);
+document.getElementById('btn-edit-bottom').addEventListener('click', goToEdit);
+
+// ============================================
+// DOWNLOAD
+// ============================================
+async function captureA4Page() {
   const element = document.getElementById('a4-preview');
-  await waitForPreviewAssets(element);
+  const originalParent = element.parentElement;
+  const originalNextSibling = element.nextSibling;
+
+  // Save parent's transform state
+  const parentTransform = originalParent.style.transform;
+  const parentWidth = originalParent.style.width;
+  const parentHeight = originalParent.style.height;
+
+  // Reset the parent's transform temporarily so it doesn't affect capture
+  originalParent.style.transform = '';
+
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 794px;
+    height: 1123px;
+    z-index: 999999;
+    background: #ffffff;
+    overflow: hidden;
+    pointer-events: none;
+  `;
+
+  wrapper.appendChild(element);
+  document.body.appendChild(wrapper);
+
+  const origStyle = element.getAttribute('style') || '';
+  element.style.cssText = `
+    position: relative;
+    width: 794px;
+    height: 1123px;
+    min-width: 794px;
+    min-height: 1123px;
+    margin: 0;
+    padding: 22mm 20mm 25mm;
+    box-shadow: none;
+    border-radius: 0;
+    transform: none;
+    flex-shrink: 0;
+  `;
+
+  await new Promise(resolve => setTimeout(resolve, 600));
 
   const canvas = await html2canvas(element, {
-    scale: 3,
+    scale: 2,
     useCORS: true,
-    allowTaint: false,
+    allowTaint: true,
     backgroundColor: '#ffffff',
     logging: false,
-    imageTimeout: 15000,
-    removeContainer: true,
-    scrollX: 0,
-    scrollY: -window.scrollY,
-    // Keep export rendering in desktop mode. This prevents @media(max-width:1024px)
-    // from changing the layout inside html2canvas's cloned document.
-    windowWidth: 1400,
-    windowHeight: 1200,
-    onclone: (clonedDoc) => {
-      const clonedPage = clonedDoc.getElementById('a4-preview');
-      if (!clonedPage) return;
-
-      // Lock page geometry to exact A4 without changing the design.
-      Object.assign(clonedPage.style, {
-        width: '210mm',
-        height: '297mm',
-        minWidth: '210mm',
-        maxWidth: '210mm',
-        minHeight: '297mm',
-        maxHeight: '297mm',
-        margin: '0',
-        transform: 'none',
-        zoom: '1',
-        flex: 'none',
-        boxSizing: 'border-box',
-        overflow: 'hidden'
-      });
-
-      // Freeze any transition/animation during capture.
-      clonedDoc.querySelectorAll('*').forEach((node) => {
-        node.style.animation = 'none';
-        node.style.transition = 'none';
-      });
-    }
+    width: 794,
+    height: 1123,
+    windowWidth: 794,
+    windowHeight: 1123
   });
+
+  element.setAttribute('style', origStyle);
+  if (originalNextSibling) {
+    originalParent.insertBefore(element, originalNextSibling);
+  } else {
+    originalParent.appendChild(element);
+  }
+  document.body.removeChild(wrapper);
+
+  // Restore parent's transform
+  originalParent.style.transform = parentTransform;
+  originalParent.style.width = parentWidth;
+  originalParent.style.height = parentHeight;
 
   return canvas;
 }
 
-function setExportButtonsDisabled(disabled) {
-  document.getElementById('download-pdf').disabled = disabled;
-  document.getElementById('download-png').disabled = disabled;
+function askToEditAfterDownload() {
+  setTimeout(() => {
+    if (confirm('✅ সফলভাবে ডাউনলোড হয়েছে!\n\nআবার এডিট করতে চান?')) {
+      goToEdit();
+    }
+  }, 500);
 }
 
 document.getElementById('download-pdf').addEventListener('click', async function() {
-  if (exportState.busy) return;
-  exportState.busy = true;
-  setExportButtonsDisabled(true);
+  const btn = this;
+  btn.textContent = '⏳ Generating...';
+  btn.disabled = true;
 
   try {
     const { jsPDF } = window.jspdf;
-    const canvas = await renderPreviewToCanvas();
-    const imgData = canvas.toDataURL('image/png', 1.0);
-
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: true
-    });
-
-    // Exact A4 dimensions: no stretching from measured browser pixels.
-    pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+    const canvas = await captureA4Page();
+    const imgData = canvas.toDataURL('image/png');
+    
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
     pdf.save('Practical_Notebook_Cover.pdf');
+    
+    askToEditAfterDownload();
   } catch (err) {
-    console.error('PDF Error:', err);
-    alert('ডাউনলোড করতে সমস্যা হচ্ছে। Logo/image load হয়েছে কি না দেখে আবার চেষ্টা করুন।');
+    console.error("PDF Error:", err);
+    alert("ডাউনলোড করতে সমস্যা হচ্ছে। দয়া করে আবার চেষ্টা করুন।");
   } finally {
-    exportState.busy = false;
-    setExportButtonsDisabled(false);
+    btn.textContent = '📄 Download PDF';
+    btn.disabled = false;
   }
 });
 
 document.getElementById('download-png').addEventListener('click', async function() {
-  if (exportState.busy) return;
-  exportState.busy = true;
-  setExportButtonsDisabled(true);
+  const btn = this;
+  btn.textContent = '⏳ Generating...';
+  btn.disabled = true;
 
   try {
-    const canvas = await renderPreviewToCanvas();
+    const canvas = await captureA4Page();
     const link = document.createElement('a');
     link.download = 'Practical_Notebook_Cover.png';
-    link.href = canvas.toDataURL('image/png', 1.0);
-    document.body.appendChild(link);
+    link.href = canvas.toDataURL('image/png');
     link.click();
-    link.remove();
+    
+    askToEditAfterDownload();
   } catch (err) {
-    console.error('PNG Error:', err);
-    alert('ডাউনলোড করতে সমস্যা হচ্ছে। Logo/image load হয়েছে কি না দেখে আবার চেষ্টা করুন।');
+    console.error("PNG Error:", err);
+    alert("ডাউনলোড করতে সমস্যা হচ্ছে। দয়া করে আবার চেষ্টা করুন।");
   } finally {
-    exportState.busy = false;
-    setExportButtonsDisabled(false);
+    btn.textContent = '🖼️ Download PNG';
+    btn.disabled = false;
   }
 });
+
+updatePreview();
 </script>
 </body>
 </html>
