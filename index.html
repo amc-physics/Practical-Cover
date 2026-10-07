@@ -105,30 +105,29 @@ body{
 .preview-topbar .btn-back:hover{background:var(--navy);color:#fff;}
 
 /* ============================================
-   Auto-Fit Preview Wrapper
+   Auto-Fit Preview (fixed: no flex on inner)
    ============================================ */
 .a4-scroll-wrapper{
   width:100%;
   background:#e5e8ee;
   border-radius:12px;
   padding:15px;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
   overflow:hidden;
 }
 .a4-scale-outer{
+  position:relative;
   overflow:hidden;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
+  margin: 0 auto;
   /* width/height set by JS */
 }
 .a4-scale-inner{
+  position:absolute;
+  top:0;
+  left:0;
   width:794px;
   height:1123px;
   transform-origin: top left;
-  flex-shrink:0;
+  flex-shrink: 0;
 }
 
 /* ============================================
@@ -139,7 +138,6 @@ body{
   height:1123px;
   min-width:794px;
   min-height:1123px;
-  flex-shrink:0;
   background-color:var(--white);
   position:relative;
   padding:22mm 20mm 25mm;
@@ -147,6 +145,7 @@ body{
   border-radius:17px;
   box-shadow:0 10px 30px rgba(19,26,71,.18);
   overflow:hidden;
+  box-sizing: border-box;
 }
 .a4-page::before{
   content:"";position:absolute;inset:10px;
@@ -362,7 +361,6 @@ img{max-width:100%;height:auto;object-fit:contain;}
       <div class="a4-scale-inner" id="a4-scale-inner">
         <div class="a4-page" id="a4-preview">
 
-          <!-- ব্যাকগ্রাউন্ড ওয়াটারমার্ক -->
           <div class="bg-watermark">
             <svg viewBox="0 0 420 420" class="gamc-logo-svg">
               <defs>
@@ -492,7 +490,6 @@ img{max-width:100%;height:auto;object-fit:contain;}
     </div>
   </div>
 
-  <!-- Download Buttons -->
   <div class="download-buttons">
     <button class="btn-download btn-download-pdf" id="download-pdf">📄 Download PDF</button>
     <button class="btn-download btn-download-png" id="download-png">🖼️ Download PNG</button>
@@ -548,7 +545,7 @@ function updatePreview() {
 }
 
 // ============================================
-// AUTO-FIT A4 TO SCREEN (ফোনেও পুরো প্রিভিউ দেখা যাবে)
+// AUTO-FIT A4 TO SCREEN (robust version)
 // ============================================
 function fitA4ToScreen() {
   const scrollWrapper = document.getElementById('a4-scroll-wrapper');
@@ -561,33 +558,45 @@ function fitA4ToScreen() {
   const A4_H = 1123;
   
   // Reset
-  inner.style.transform = '';
+  inner.style.transform = 'none';
   outer.style.width = A4_W + 'px';
   outer.style.height = A4_H + 'px';
   
-  // Available width = wrapper width - padding
-  const style = getComputedStyle(scrollWrapper);
-  const paddingLeft = parseFloat(style.paddingLeft) || 0;
-  const paddingRight = parseFloat(style.paddingRight) || 0;
-  const availableWidth = scrollWrapper.clientWidth - paddingLeft - paddingRight;
+  // Get wrapper inner width (content area)
+  const wrapperStyle = getComputedStyle(scrollWrapper);
+  const wrapperPaddingL = parseFloat(wrapperStyle.paddingLeft) || 0;
+  const wrapperPaddingR = parseFloat(wrapperStyle.paddingRight) || 0;
+  const wrapperInnerWidth = scrollWrapper.clientWidth - wrapperPaddingL - wrapperPaddingR;
   
-  if (availableWidth > 0 && availableWidth < A4_W) {
-    const scale = availableWidth / A4_W;
-    inner.style.transform = `scale(${scale})`;
-    inner.style.transformOrigin = 'top left';
-    outer.style.width = (A4_W * scale) + 'px';
-    outer.style.height = (A4_H * scale) + 'px';
-  } else {
-    outer.style.width = A4_W + 'px';
-    outer.style.height = A4_H + 'px';
+  if (wrapperInnerWidth <= 0) return;
+  
+  // Scale factor
+  let scale = 1;
+  if (wrapperInnerWidth < A4_W) {
+    scale = wrapperInnerWidth / A4_W;
   }
+  
+  inner.style.transform = `scale(${scale})`;
+  outer.style.width = (A4_W * scale) + 'px';
+  outer.style.height = (A4_H * scale) + 'px';
 }
 
-// Window resize হলে আবার ফিট করবে
+// Multiple retries for robust fitting
+function fitWithRetries() {
+  fitA4ToScreen();
+  setTimeout(fitA4ToScreen, 100);
+  setTimeout(fitA4ToScreen, 300);
+  setTimeout(fitA4ToScreen, 600);
+  setTimeout(fitA4ToScreen, 1200);
+}
+
 let resizeTimer;
 window.addEventListener('resize', function() {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(fitA4ToScreen, 100);
+  resizeTimer = setTimeout(fitA4ToScreen, 150);
+});
+window.addEventListener('orientationchange', function() {
+  setTimeout(fitA4ToScreen, 300);
 });
 
 // ============================================
@@ -597,8 +606,7 @@ document.getElementById('btn-show-preview').addEventListener('click', function()
   updatePreview();
   document.getElementById('step1').style.display = 'none';
   document.getElementById('step2').classList.add('active');
-  // লেআউট হওয়ার পর ফিট করবে
-  setTimeout(fitA4ToScreen, 60);
+  fitWithRetries();
   window.scrollTo({top: 0, behavior: 'smooth'});
 });
 
@@ -611,6 +619,11 @@ function goToEdit() {
 document.getElementById('btn-back').addEventListener('click', goToEdit);
 document.getElementById('btn-edit-bottom').addEventListener('click', goToEdit);
 
+// Call fit on initial load too
+window.addEventListener('load', function() {
+  fitWithRetries();
+});
+
 // ============================================
 // DOWNLOAD
 // ============================================
@@ -619,13 +632,16 @@ async function captureA4Page() {
   const originalParent = element.parentElement;
   const originalNextSibling = element.nextSibling;
 
-  // Save parent's transform state
-  const parentTransform = originalParent.style.transform;
-  const parentWidth = originalParent.style.width;
-  const parentHeight = originalParent.style.height;
+  // Detach from the scaled wrapper temporarily
+  const outer = document.getElementById('a4-scale-outer');
+  const outerW = outer.style.width;
+  const outerH = outer.style.height;
+  const innerTransform = document.getElementById('a4-scale-inner').style.transform;
 
-  // Reset the parent's transform temporarily so it doesn't affect capture
-  originalParent.style.transform = '';
+  // Reset scaling before capture
+  document.getElementById('a4-scale-inner').style.transform = 'none';
+  outer.style.width = '794px';
+  outer.style.height = '1123px';
 
   const wrapper = document.createElement('div');
   wrapper.style.cssText = `
@@ -656,6 +672,7 @@ async function captureA4Page() {
     border-radius: 0;
     transform: none;
     flex-shrink: 0;
+    box-sizing: border-box;
   `;
 
   await new Promise(resolve => setTimeout(resolve, 600));
@@ -680,10 +697,12 @@ async function captureA4Page() {
   }
   document.body.removeChild(wrapper);
 
-  // Restore parent's transform
-  originalParent.style.transform = parentTransform;
-  originalParent.style.width = parentWidth;
-  originalParent.style.height = parentHeight;
+  // Restore scaling
+  document.getElementById('a4-scale-inner').style.transform = innerTransform;
+  outer.style.width = outerW;
+  outer.style.height = outerH;
+  // Re-fit to ensure proper display
+  setTimeout(fitA4ToScreen, 50);
 
   return canvas;
 }
