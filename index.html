@@ -28,13 +28,13 @@ body{
   min-height:100vh;
 }
 .main-container{
-  display:flex;gap:30px;max-width:1400px;
-  width:100%;align-items:flex-start;
+  display:flex;justify-content:center;
+  width:100%;max-width:440px;align-items:flex-start;
 }
 .form-panel{
   background:white;padding:30px;border-radius:12px;
   box-shadow:0 4px 15px rgba(0,0,0,0.05);
-  width:400px;flex-shrink:0;position:sticky;top:20px;
+  width:400px;flex-shrink:0;position:static;
   max-height:95vh;overflow-y:auto;
 }
 .form-panel h2{
@@ -82,8 +82,16 @@ body{
 .btn-png:hover{background-color:#c99d32;}
 .btn:disabled{opacity:.7;cursor:wait;}
 
+/* Preview hidden from the user, but kept rendered off-screen so PDF/PNG export still works. */
 .preview-panel{
-  flex-grow:1;display:flex;justify-content:center;overflow-x:auto;
+  position:fixed;
+  left:-10000px;
+  top:0;
+  width:210mm;
+  height:297mm;
+  display:block;
+  overflow:visible;
+  pointer-events:none;
 }
 
 .a4-page{
@@ -96,10 +104,14 @@ body{
   box-shadow:0 10px 30px rgba(19,26,71,.12);
   overflow:hidden;
 }
-.a4-page::before{
-  content:"";position:absolute;inset:10px;
+.inner-border{
+  position:absolute;
+  top:10px;right:10px;bottom:10px;left:10px;
   border:1.5px solid var(--gold);
-  border-radius:12px;pointer-events:none;z-index:1;
+  border-radius:12px;
+  pointer-events:none;
+  z-index:1;
+  box-sizing:border-box;
 }
 .corner{position:absolute;background:var(--gold);z-index:3;}
 .tl-h{left:12px;top:25px;width:88px;height:6px;}
@@ -257,9 +269,18 @@ img{max-width:100%;height:auto;object-fit:contain;}
 }
 
 @media(max-width:1024px){
-  .main-container{flex-direction:column;align-items:center;}
+  .main-container{align-items:center;}
   .form-panel{width:100%;max-width:600px;position:static;}
-  .preview-panel{width:100%;overflow-x:auto;justify-content:flex-start;}
+  .preview-panel{
+    position:fixed;
+    left:-10000px;
+    top:0;
+    width:210mm;
+    height:297mm;
+    display:block;
+    overflow:visible;
+    pointer-events:none;
+  }
 }
 </style>
 </head>
@@ -301,8 +322,9 @@ img{max-width:100%;height:auto;object-fit:contain;}
     </div>
   </div>
 
-  <div class="preview-panel">
+  <div class="preview-panel" aria-hidden="true">
     <div class="a4-page" id="a4-preview">
+      <div class="inner-border" aria-hidden="true"></div>
       <i class="corner tl-h"></i><i class="corner tl-v"></i>
       <i class="corner tr-h"></i><i class="corner tr-v"></i>
 
