@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Practical Notebook Cover Generator (AMC Theme)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Times+New+Roman&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -29,6 +30,114 @@ body{
   align-items:flex-start;
 }
 
+/* ============================================
+   INTRO SCREEN (Mobile-Friendly Image + Button)
+   ============================================ */
+.intro-screen{
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100vh;
+  height: 100dvh;
+  background: #0a0a15;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  padding: 15px;
+  padding-bottom: 30px;
+  transition: opacity 0.5s ease, visibility 0.5s;
+  overflow: hidden;
+  text-align: center;
+  gap: 25px;
+}
+.intro-screen.hide{
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ছবি কন্টেইনার - ফোনে পুরো ছবি ফিট করবে */
+.intro-image-wrapper{
+  width: 100%;
+  max-width: 500px;
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 0;
+}
+
+.intro-image{
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+  border: 3px solid var(--gold);
+  object-fit: contain;
+  display: block;
+}
+
+/* অ্যানিমেটেড এখানে চাপুন বাটন */
+.btn-tap-here{
+  flex: 0 0 auto;
+  padding: 18px 50px;
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'Hind Siliguri', 'Inter', sans-serif;
+  color: #fff;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  border: 4px solid #ffdd00;
+  border-radius: 60px;
+  cursor: pointer;
+  position: relative;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+  box-shadow: 0 10px 30px rgba(231, 76, 60, 0.6), 0 0 0 0 rgba(255, 221, 0, 0.7);
+  animation: tapPulse 1.5s infinite, tapBounce 0.8s infinite alternate;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  margin-top: 5px;
+}
+.btn-tap-here:hover{
+  transform: scale(1.08);
+  background: linear-gradient(135deg, #ff5e4d, #e74c3c);
+}
+.btn-tap-here:active{
+  transform: scale(0.95);
+}
+
+@keyframes tapPulse{
+  0%{ box-shadow: 0 10px 30px rgba(231, 76, 60, 0.6), 0 0 0 0 rgba(255, 221, 0, 0.7); }
+  70%{ box-shadow: 0 10px 30px rgba(231, 76, 60, 0.6), 0 0 0 25px rgba(255, 221, 0, 0); }
+  100%{ box-shadow: 0 10px 30px rgba(231, 76, 60, 0.6), 0 0 0 0 rgba(255, 221, 0, 0); }
+}
+
+@keyframes tapBounce{
+  0%{ transform: translateY(0); }
+  100%{ transform: translateY(-8px); }
+}
+
+.btn-tap-here::before{
+  content: "👇";
+  position: absolute;
+  top: -55px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 38px;
+  animation: arrowBounce 0.8s infinite alternate;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+@keyframes arrowBounce{
+  0%{ transform: translateX(-50%) translateY(0); }
+  100%{ transform: translateX(-50%) translateY(-15px); }
+}
+
+/* ============================================
+   STEP CONTAINER
+   ============================================ */
 .step-container{
   width:100%;
   max-width:500px;
@@ -37,6 +146,7 @@ body{
   border-radius:14px;
   box-shadow:0 10px 30px rgba(19,26,71,.12);
   margin-top:30px;
+  display: none;
 }
 .step-container h2{
   font-size:22px;color:var(--navy);
@@ -86,6 +196,9 @@ body{
 }
 .btn-main:hover{background:#1a1c5c;transform:translateY(-1px);}
 
+/* ============================================
+   PREVIEW SCREEN
+   ============================================ */
 .preview-screen{
   display:none;width:100%;max-width:900px;margin-top:20px;
 }
@@ -105,9 +218,6 @@ body{
 }
 .preview-topbar .btn-back:hover{background:var(--navy);color:#fff;}
 
-/* ============================================
-   Auto-Fit Preview
-   ============================================ */
 .a4-scroll-wrapper{
   width:100%;
   background:#e5e8ee;
@@ -130,9 +240,6 @@ body{
   flex-shrink: 0;
 }
 
-/* ============================================
-   A4 Page
-   ============================================ */
 .a4-page{
   width:794px;
   height:1123px;
@@ -279,9 +386,6 @@ img{max-width:100%;height:auto;object-fit:contain;}
   font-weight:700;font-size:10px;margin-top:5px;
 }
 
-/* ============================================
-   Success Message (Toast Style)
-   ============================================ */
 .success-toast{
   display:none;
   margin-top:15px;
@@ -305,29 +409,20 @@ img{max-width:100%;height:auto;object-fit:contain;}
   background: #fff;
   opacity: 0.4;
 }
-.success-toast.show{
-  display:block;
-}
+.success-toast.show{display:block;}
 .success-toast .check-icon{
   display:inline-block;
-  width:22px;
-  height:22px;
+  width:22px;height:22px;
   border-radius:50%;
   background: rgba(255,255,255,0.25);
-  line-height:22px;
-  text-align:center;
-  margin-right:8px;
-  font-size:14px;
-  vertical-align:middle;
+  line-height:22px;text-align:center;
+  margin-right:8px;font-size:14px;vertical-align:middle;
 }
 @keyframes slideDown{
   from{opacity:0; transform: translateY(-10px);}
   to{opacity:1; transform: translateY(0);}
 }
 
-/* ============================================
-   Download Buttons
-   ============================================ */
 .download-buttons{
   display:flex;gap:12px;margin-top:20px;
 }
@@ -342,36 +437,24 @@ img{max-width:100%;height:auto;object-fit:contain;}
 .btn-download-png:hover{background:#1e8449;}
 .btn-download:disabled{opacity:0.7;cursor:not-allowed;}
 
-/* Edit & New buttons */
 .action-buttons-bottom{
-  display:flex;
-  gap:10px;
-  margin-top:12px;
+  display:flex;gap:10px;margin-top:12px;
 }
 .btn-edit-bottom,
 .btn-new-bottom{
-  flex:1;
-  padding:14px;
-  border-radius:10px;
-  font-size:15px;
-  font-weight:700;
-  cursor:pointer;
-  transition:0.2s;
-  letter-spacing:.3px;
+  flex:1;padding:14px;border-radius:10px;
+  font-size:15px;font-weight:700;cursor:pointer;
+  transition:0.2s;letter-spacing:.3px;
   font-family: 'Inter', sans-serif;
 }
 .btn-edit-bottom{
-  border:2px solid var(--navy);
-  background:#fff;
-  color:var(--navy);
+  border:2px solid var(--navy);background:#fff;color:var(--navy);
 }
 .btn-edit-bottom:hover{
   background:var(--navy);color:#fff;transform:translateY(-1px);
 }
 .btn-new-bottom{
-  border:2px solid var(--gold);
-  background:#fff;
-  color:var(--gold);
+  border:2px solid var(--gold);background:#fff;color:var(--gold);
 }
 .btn-new-bottom:hover{
   background:var(--gold);color:#fff;transform:translateY(-1px);
@@ -386,12 +469,59 @@ img{max-width:100%;height:auto;object-fit:contain;}
   .download-buttons{flex-direction:column;}
   .action-buttons-bottom{flex-direction:column;}
   .a4-scroll-wrapper{padding:10px;}
+  
+  /* Intro মোবাইলে */
+  .intro-screen{
+    padding: 15px 12px 25px;
+    gap: 20px;
+  }
+  .intro-image-wrapper{
+    max-width: 100%;
+  }
+  .intro-image{
+    border-radius: 14px;
+    border-width: 2px;
+  }
+  .btn-tap-here{
+    padding: 15px 40px;
+    font-size: 20px;
+    border-width: 3px;
+  }
+  .btn-tap-here::before{
+    font-size: 30px;
+    top: -42px;
+  }
+}
+
+@media(max-width:380px){
+  .btn-tap-here{
+    padding: 13px 32px;
+    font-size: 17px;
+  }
+  .btn-tap-here::before{
+    font-size: 26px;
+    top: -36px;
+  }
 }
 </style>
 </head>
 <body>
 
-<!-- STEP 1: INPUT FORM -->
+<!-- ============================================
+     INTRO SCREEN
+     ============================================ -->
+<div class="intro-screen" id="intro-screen">
+  <div class="intro-image-wrapper">
+    <!-- এখানে আপনার ছবির লিংক বা ফাইলের নাম বসান -->
+    <img src="Comic Lab Cover Page Banner.png" alt="Welcome" class="intro-image">
+  </div>
+  
+  <button class="btn-tap-here" id="btn-start">এখানে চাপুন</button>
+</div>
+
+<!-- ============================================
+     STEP 1: INPUT FORM
+     ============================================ -->
 <div class="step-container" id="step1">
   <h2>তথ্য পূরণ করুন</h2>
   <p class="subtitle">নিচের তথ্যগুলো পূরণ করে "Show Preview" বাটনে ক্লিক করুন</p>
@@ -424,7 +554,9 @@ img{max-width:100%;height:auto;object-fit:contain;}
   <button class="btn-main" id="btn-show-preview">Show Preview →</button>
 </div>
 
-<!-- STEP 2: PREVIEW + DOWNLOAD -->
+<!-- ============================================
+     STEP 2: PREVIEW + DOWNLOAD
+     ============================================ -->
 <div class="preview-screen" id="step2">
   <div class="preview-topbar">
     <span class="title">প্রিভিউ দেখুন</span>
@@ -565,7 +697,6 @@ img{max-width:100%;height:auto;object-fit:contain;}
     </div>
   </div>
 
-  <!-- ✅ Success Message (Toast) -->
   <div class="success-toast" id="success-toast">
     <span class="check-icon">✓</span>
     <span id="success-message">ডাউনলোড সফলভাবে সম্পন্ন হয়েছে!</span>
@@ -576,7 +707,6 @@ img{max-width:100%;height:auto;object-fit:contain;}
     <button class="btn-download btn-download-png" id="download-png">🖼️ Download PNG</button>
   </div>
 
-  <!-- Action Buttons: Edit + Generate New -->
   <div class="action-buttons-bottom">
     <button class="btn-edit-bottom" id="btn-edit-bottom">✏️ Edit Info</button>
     <button class="btn-new-bottom" id="btn-new-bottom">🆕 Generate Another</button>
@@ -628,6 +758,20 @@ function updatePreview() {
   setPreviewValue(previews.regNo, inputs.regNo.value, placeholders.regNo);
   setPreviewValue(previews.classRoll, inputs.classRoll.value, placeholders.classRoll);
 }
+
+// ============================================
+// INTRO SCREEN LOGIC
+// ============================================
+document.getElementById('btn-start').addEventListener('click', function() {
+  const intro = document.getElementById('intro-screen');
+  intro.classList.add('hide');
+  
+  setTimeout(() => {
+    intro.style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }, 500);
+});
 
 // ============================================
 // AUTO-FIT A4 TO SCREEN
@@ -689,7 +833,6 @@ function showSuccessMessage(format) {
   msg.textContent = `✅ ${format} সফলভাবে ডাউনলোড হয়েছে! চাইলে আবার এডিট করে নতুন করে ডাউনলোড করতে পারেন।`;
   toast.classList.add('show');
   
-  // Auto-hide after 5 seconds
   clearTimeout(toast._hideTimer);
   toast._hideTimer = setTimeout(() => {
     toast.classList.remove('show');
@@ -720,7 +863,6 @@ function goToEdit() {
 }
 
 function generateNew() {
-  // Reset form fields
   inputs.subjectName.selectedIndex = 0;
   inputs.name.value = '';
   inputs.examRoll.value = '';
