@@ -16,6 +16,7 @@
   --field-border:#d7dceb;
   --white:#ffffff;
   --placeholder:#a6aec5;
+  --success:#27ae60;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
@@ -105,7 +106,7 @@ body{
 .preview-topbar .btn-back:hover{background:var(--navy);color:#fff;}
 
 /* ============================================
-   Auto-Fit Preview (fixed: no flex on inner)
+   Auto-Fit Preview
    ============================================ */
 .a4-scroll-wrapper{
   width:100%;
@@ -118,7 +119,6 @@ body{
   position:relative;
   overflow:hidden;
   margin: 0 auto;
-  /* width/height set by JS */
 }
 .a4-scale-inner{
   position:absolute;
@@ -279,6 +279,55 @@ img{max-width:100%;height:auto;object-fit:contain;}
   font-weight:700;font-size:10px;margin-top:5px;
 }
 
+/* ============================================
+   Success Message (Toast Style)
+   ============================================ */
+.success-toast{
+  display:none;
+  margin-top:15px;
+  padding:16px 20px;
+  background: linear-gradient(135deg, #27ae60, #1e8449);
+  color:#fff;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:600;
+  text-align:center;
+  box-shadow: 0 6px 20px rgba(39,174,96,0.35);
+  animation: slideDown 0.4s ease;
+  position:relative;
+  overflow:hidden;
+}
+.success-toast::before{
+  content:"";
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:6px;
+  background: #fff;
+  opacity: 0.4;
+}
+.success-toast.show{
+  display:block;
+}
+.success-toast .check-icon{
+  display:inline-block;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background: rgba(255,255,255,0.25);
+  line-height:22px;
+  text-align:center;
+  margin-right:8px;
+  font-size:14px;
+  vertical-align:middle;
+}
+@keyframes slideDown{
+  from{opacity:0; transform: translateY(-10px);}
+  to{opacity:1; transform: translateY(0);}
+}
+
+/* ============================================
+   Download Buttons
+   ============================================ */
 .download-buttons{
   display:flex;gap:12px;margin-top:20px;
 }
@@ -293,14 +342,39 @@ img{max-width:100%;height:auto;object-fit:contain;}
 .btn-download-png:hover{background:#1e8449;}
 .btn-download:disabled{opacity:0.7;cursor:not-allowed;}
 
+/* Edit & New buttons */
+.action-buttons-bottom{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+.btn-edit-bottom,
+.btn-new-bottom{
+  flex:1;
+  padding:14px;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  transition:0.2s;
+  letter-spacing:.3px;
+  font-family: 'Inter', sans-serif;
+}
 .btn-edit-bottom{
-  width:100%;padding:14px;margin-top:12px;
-  border:2px solid var(--navy);background:#fff;color:var(--navy);
-  border-radius:10px;font-size:16px;font-weight:700;
-  cursor:pointer;transition:0.2s;letter-spacing:.3px;
+  border:2px solid var(--navy);
+  background:#fff;
+  color:var(--navy);
 }
 .btn-edit-bottom:hover{
   background:var(--navy);color:#fff;transform:translateY(-1px);
+}
+.btn-new-bottom{
+  border:2px solid var(--gold);
+  background:#fff;
+  color:var(--gold);
+}
+.btn-new-bottom:hover{
+  background:var(--gold);color:#fff;transform:translateY(-1px);
 }
 
 @media(max-width:768px){
@@ -310,6 +384,7 @@ img{max-width:100%;height:auto;object-fit:contain;}
   .preview-topbar{flex-direction:column;align-items:stretch;}
   .preview-topbar .btn-back{width:100%;}
   .download-buttons{flex-direction:column;}
+  .action-buttons-bottom{flex-direction:column;}
   .a4-scroll-wrapper{padding:10px;}
 }
 </style>
@@ -405,7 +480,7 @@ img{max-width:100%;height:auto;object-fit:contain;}
 
             <div class="header-row">
               <div class="left-logo">
-                <img id="left-logo-img" src="https://amc.eshiksaems.com/image/dclogo.png" alt="College Logo">
+                <img id="left-logo-img" src="dclogo.png" alt="College Logo">
               </div>
               
               <div class="title-section">
@@ -490,12 +565,22 @@ img{max-width:100%;height:auto;object-fit:contain;}
     </div>
   </div>
 
+  <!-- ✅ Success Message (Toast) -->
+  <div class="success-toast" id="success-toast">
+    <span class="check-icon">✓</span>
+    <span id="success-message">ডাউনলোড সফলভাবে সম্পন্ন হয়েছে!</span>
+  </div>
+
   <div class="download-buttons">
     <button class="btn-download btn-download-pdf" id="download-pdf">📄 Download PDF</button>
     <button class="btn-download btn-download-png" id="download-png">🖼️ Download PNG</button>
   </div>
 
-  <button class="btn-edit-bottom" id="btn-edit-bottom">✏️ Edit Information</button>
+  <!-- Action Buttons: Edit + Generate New -->
+  <div class="action-buttons-bottom">
+    <button class="btn-edit-bottom" id="btn-edit-bottom">✏️ Edit Info</button>
+    <button class="btn-new-bottom" id="btn-new-bottom">🆕 Generate Another</button>
+  </div>
 </div>
 
 <script>
@@ -545,7 +630,7 @@ function updatePreview() {
 }
 
 // ============================================
-// AUTO-FIT A4 TO SCREEN (robust version)
+// AUTO-FIT A4 TO SCREEN
 // ============================================
 function fitA4ToScreen() {
   const scrollWrapper = document.getElementById('a4-scroll-wrapper');
@@ -557,12 +642,10 @@ function fitA4ToScreen() {
   const A4_W = 794;
   const A4_H = 1123;
   
-  // Reset
   inner.style.transform = 'none';
   outer.style.width = A4_W + 'px';
   outer.style.height = A4_H + 'px';
   
-  // Get wrapper inner width (content area)
   const wrapperStyle = getComputedStyle(scrollWrapper);
   const wrapperPaddingL = parseFloat(wrapperStyle.paddingLeft) || 0;
   const wrapperPaddingR = parseFloat(wrapperStyle.paddingRight) || 0;
@@ -570,7 +653,6 @@ function fitA4ToScreen() {
   
   if (wrapperInnerWidth <= 0) return;
   
-  // Scale factor
   let scale = 1;
   if (wrapperInnerWidth < A4_W) {
     scale = wrapperInnerWidth / A4_W;
@@ -581,7 +663,6 @@ function fitA4ToScreen() {
   outer.style.height = (A4_H * scale) + 'px';
 }
 
-// Multiple retries for robust fitting
 function fitWithRetries() {
   fitA4ToScreen();
   setTimeout(fitA4ToScreen, 100);
@@ -600,10 +681,31 @@ window.addEventListener('orientationchange', function() {
 });
 
 // ============================================
+// SUCCESS MESSAGE HELPER
+// ============================================
+function showSuccessMessage(format) {
+  const toast = document.getElementById('success-toast');
+  const msg = document.getElementById('success-message');
+  msg.textContent = `✅ ${format} সফলভাবে ডাউনলোড হয়েছে! চাইলে আবার এডিট করে নতুন করে ডাউনলোড করতে পারেন।`;
+  toast.classList.add('show');
+  
+  // Auto-hide after 5 seconds
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 5000);
+}
+
+function hideSuccessMessage() {
+  document.getElementById('success-toast').classList.remove('show');
+}
+
+// ============================================
 // STEP NAVIGATION
 // ============================================
 document.getElementById('btn-show-preview').addEventListener('click', function() {
   updatePreview();
+  hideSuccessMessage();
   document.getElementById('step1').style.display = 'none';
   document.getElementById('step2').classList.add('active');
   fitWithRetries();
@@ -611,6 +713,22 @@ document.getElementById('btn-show-preview').addEventListener('click', function()
 });
 
 function goToEdit() {
+  hideSuccessMessage();
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step1').style.display = 'block';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function generateNew() {
+  // Reset form fields
+  inputs.subjectName.selectedIndex = 0;
+  inputs.name.value = '';
+  inputs.examRoll.value = '';
+  inputs.regNo.value = '';
+  inputs.classRoll.value = '';
+  
+  updatePreview();
+  hideSuccessMessage();
   document.getElementById('step2').classList.remove('active');
   document.getElementById('step1').style.display = 'block';
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -618,8 +736,8 @@ function goToEdit() {
 
 document.getElementById('btn-back').addEventListener('click', goToEdit);
 document.getElementById('btn-edit-bottom').addEventListener('click', goToEdit);
+document.getElementById('btn-new-bottom').addEventListener('click', generateNew);
 
-// Call fit on initial load too
 window.addEventListener('load', function() {
   fitWithRetries();
 });
@@ -632,13 +750,11 @@ async function captureA4Page() {
   const originalParent = element.parentElement;
   const originalNextSibling = element.nextSibling;
 
-  // Detach from the scaled wrapper temporarily
   const outer = document.getElementById('a4-scale-outer');
   const outerW = outer.style.width;
   const outerH = outer.style.height;
   const innerTransform = document.getElementById('a4-scale-inner').style.transform;
 
-  // Reset scaling before capture
   document.getElementById('a4-scale-inner').style.transform = 'none';
   outer.style.width = '794px';
   outer.style.height = '1123px';
@@ -697,28 +813,19 @@ async function captureA4Page() {
   }
   document.body.removeChild(wrapper);
 
-  // Restore scaling
   document.getElementById('a4-scale-inner').style.transform = innerTransform;
   outer.style.width = outerW;
   outer.style.height = outerH;
-  // Re-fit to ensure proper display
   setTimeout(fitA4ToScreen, 50);
 
   return canvas;
-}
-
-function askToEditAfterDownload() {
-  setTimeout(() => {
-    if (confirm('✅ সফলভাবে ডাউনলোড হয়েছে!\n\nআবার এডিট করতে চান?')) {
-      goToEdit();
-    }
-  }, 500);
 }
 
 document.getElementById('download-pdf').addEventListener('click', async function() {
   const btn = this;
   btn.textContent = '⏳ Generating...';
   btn.disabled = true;
+  hideSuccessMessage();
 
   try {
     const { jsPDF } = window.jspdf;
@@ -732,7 +839,7 @@ document.getElementById('download-pdf').addEventListener('click', async function
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
     pdf.save('Practical_Notebook_Cover.pdf');
     
-    askToEditAfterDownload();
+    showSuccessMessage('PDF');
   } catch (err) {
     console.error("PDF Error:", err);
     alert("ডাউনলোড করতে সমস্যা হচ্ছে। দয়া করে আবার চেষ্টা করুন।");
@@ -746,6 +853,7 @@ document.getElementById('download-png').addEventListener('click', async function
   const btn = this;
   btn.textContent = '⏳ Generating...';
   btn.disabled = true;
+  hideSuccessMessage();
 
   try {
     const canvas = await captureA4Page();
@@ -754,7 +862,7 @@ document.getElementById('download-png').addEventListener('click', async function
     link.href = canvas.toDataURL('image/png');
     link.click();
     
-    askToEditAfterDownload();
+    showSuccessMessage('PNG');
   } catch (err) {
     console.error("PNG Error:", err);
     alert("ডাউনলোড করতে সমস্যা হচ্ছে। দয়া করে আবার চেষ্টা করুন।");
